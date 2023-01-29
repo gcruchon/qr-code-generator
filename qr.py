@@ -11,6 +11,21 @@ BASE_WIDTH = 100
 HIGH_CORRECTION = qrcode.constants.ERROR_CORRECT_H
 
 
+def has_transparency(img):
+    if img.info.get("transparency", None) is not None:
+        return True
+    if img.mode == "P":
+        transparent = img.info.get("transparency", -1)
+        for _, index in img.getcolors():
+            if index == transparent:
+                return True
+    elif img.mode == "RGBA":
+        extrema = img.getextrema()
+        if extrema[3][0] < 255:
+            return True
+
+    return False
+
 def add_resized_logo(qr_img, logo_path):
     print("- Adding logo:", logo_path)
     try:
@@ -24,7 +39,11 @@ def add_resized_logo(qr_img, logo_path):
             (qr_img.size[1] - logo_img.size[1]) // 2,
         )
 
-        qr_img.paste(logo_img, top_left_logo_position, logo_img)
+        if has_transparency(logo_img):
+            qr_img.paste(logo_img, top_left_logo_position, logo_img)
+        else:
+            qr_img.paste(logo_img, top_left_logo_position)
+
     except FileNotFoundError:
         print("- Logo not found, step ignored")
 
@@ -62,7 +81,7 @@ def clean_filename(file_name):
 
 def main(argv):
     input_text = None
-    output_file = "qr"
+    output_file = "qr.png"
     logo_file = None
     opts, args = getopt.getopt(argv, "ht:o:l:", ["text=", "output=", "logo="])
     for opt, arg in opts:
