@@ -30,3 +30,7 @@ Please note that:
 
 - QR codes are generated in the `output` folder.
 - logo file should be in the `logos` folder.
+
+## Example of generated QR Code
+
+![Generated QR Code](example/qr.png)
